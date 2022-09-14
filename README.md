@@ -1,2 +1,2 @@
 # tasks
-This repository contains examples of solving interesting tasks for me.
+This repository contains examples of solving interesting problems for me, and algorithms.
