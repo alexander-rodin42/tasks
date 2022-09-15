@@ -19,21 +19,6 @@ namespace rav {
         }
     }
 
-    void print_vector(const std::vector<int>& vector, const std::string& message)
-    {
-        std::cout << message;
-        for (const auto& value : vector)
-        {
-            std::cout << value << " ";
-        }
-        std::cout << std::endl;
-    }
-
-    bool custom_comparator(int a, int b)
-    {
-        return a < b;
-    }
-
     //----------------------------------------------------------------------------------------------
 
     template <typename Collection, typename Comparator, typename = typename Collection::size_type>
@@ -50,6 +35,24 @@ namespace rav {
             }
         }
     }
+
+    //----------------------------------------------------------------------------------------------
+
+    void print_vector(const std::vector<int>& vector, const std::string& message)
+    {
+        std::cout << message;
+        for (const auto& value : vector)
+        {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    bool custom_comparator(int a, int b)
+    {
+        return a < b;
+    }
+
 }  // namespace rav
 
 
