@@ -37,20 +37,20 @@ namespace rav {
 
     //----------------------------------------------------------------------------------------------
 
-    template <typename Collection>
-    void quick_sort_template(Collection& array, size_t left, size_t right)
+    template <typename Collection, typename Comparator>
+    void quick_sort_template(Collection& array, size_t left, size_t right, Comparator comparator)
     {
         size_t l = left;
         size_t r = right;
-        auto key = array[(left + right) / 2];
+        auto mid = array[(left + right) / 2];
 
         while (l <= r)
         {
-            while (array[l] < key)
+            while (comparator(mid, array[l]))
             {
                 l++;
             }
-            while (array[r] > key)
+            while (comparator(array[r], mid))
             {
                 r--;
             }
@@ -62,21 +62,21 @@ namespace rav {
 
         if (l < right)
         {
-            quick_sort_template(array, l, right);
+            quick_sort_template(array, l, right, comparator);
         }
         if (r > left)
         {
-            quick_sort_template(array, left, r);
+            quick_sort_template(array, left, r, comparator);
         }
     }
 
     //----------------------------------------------------------------------------------------------
 
     template <typename Collection>
-    void print_array(const Collection& array, const std::string& message)
+    void print_collection(const Collection& collection, const std::string& message)
     {
         std::cout << message;
-        for (auto& value : array)
+        for (const auto& value : collection)
         {
             std::cout << value << " ";
         }
@@ -88,18 +88,20 @@ namespace rav {
 int main()
 {
     std::vector<int> vector = {7, 9, 1, 5, 8, 1, 8, 3, 7, 3, 4, 1, 9, 2, 3};
-    rav::print_array(vector, "Not sorted vector: ");
+    rav::print_collection(vector, "Not sorted vector: ");
 
     rav::quick_sort(vector, 0, vector.size() - 1);
-    rav::print_array(vector, "Sorted vector: ");
+    rav::print_collection(vector, "Sorted vector: ");
 
     //----------------------------------------------------------------------------------------------
 
     std::array<int, 15> array = {7, 9, 1, 5, 8, 1, 8, 3, 7, 3, 4, 1, 9, 2, 3};
-    rav::print_array(array, "Not sorted array: ");
+    rav::print_collection(array, "Not sorted array: ");
 
-    rav::quick_sort_template(array, 0, array.size() - 1);
-    rav::print_array(array, "Sorted array: ");
+    rav::quick_sort_template(array, 0, array.size() - 1, [](int a, int b) -> bool { return a > b; });
+    rav::print_collection(array, "Sorted array: ");
+    rav::quick_sort_template(array, 0, array.size() - 1, [](int a, int b) -> bool { return a < b; });
+    rav::print_collection(array, "Sorted array: ");
 
     return EXIT_SUCCESS;
 }
