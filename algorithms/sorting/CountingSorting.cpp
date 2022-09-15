@@ -23,14 +23,14 @@ namespace rav {
 
         std::vector<size_t> count(max - min + 1);
 
-        if (min > 0)
-        {
-            for_each(vector.begin(), vector.end(), [&count, &min](int x) { ++count[x - static_cast<size_t>(min)]; });
-        }
-        else
+        if (min < 0)
         {
             for_each(vector.begin(), vector.end(),
                      [&count, &min](int x) { ++count[x + static_cast<size_t>(std::abs(min))]; });
+        }
+        else
+        {
+            for_each(vector.begin(), vector.end(), [&count, &min](int x) { ++count[x - static_cast<size_t>(min)]; });
         }
 
         vector.clear();
