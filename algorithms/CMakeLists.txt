@@ -9,6 +9,7 @@ set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Sorting
 add_executable(BubbleSorting ./sorting/BubbleSorting.cpp)
-add_executable(QuickSorting ./Sorting/QuickSorting.cpp)
-add_executable(CountingSorting ./Sorting/CountingSorting.cpp)
-set_target_properties (BubbleSorting QuickSorting CountingSorting PROPERTIES FOLDER "Sorting")
+add_executable(QuickSorting ./sorting/QuickSorting.cpp)
+add_executable(CountingSorting ./sorting/CountingSorting.cpp)
+add_executable(InsertionSorting ./sorting/InsertionSorting.cpp)
+set_target_properties (BubbleSorting QuickSorting CountingSorting InsertionSorting PROPERTIES FOLDER "Sorting")
