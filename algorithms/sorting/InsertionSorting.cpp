@@ -4,15 +4,15 @@
 
 namespace rav {
 
-    auto custom_comparator = [](int a, int b) -> bool { return a > b; };
+    auto custom_comparator = [](int a, int b) -> bool { return a < b; };
 
     void insertion_sorting(std::vector<int>& vector, std::function<bool(int, int)> comparator = custom_comparator) noexcept
     {
         for (int i = 1; i < vector.size(); ++i)
         {
-            for (int j = i; (j > 0) && comparator(vector[j - 1], vector[j]); --j)
+            for (int j = i; (j > 0) && comparator(vector[j], vector[j - 1]); --j)
             {
-                std::swap(vector[j - 1], vector[j]);
+                std::swap(vector[j], vector[j - 1]);
             }
         }
     }
@@ -23,8 +23,8 @@ namespace rav {
     void insertion_sorting_template(Collection& collection, Comparator comparator) noexcept
     {
         for (auto i = 1; i < collection.size(); i++)
-            for (auto j = i; (j > 0) && (comparator(collection[j - 1], collection[j])); j--)
-                std::swap(collection[j - 1], collection[j]);
+            for (auto j = i; (j > 0) && (comparator(collection[j], collection[j - 1])); j--)
+                std::swap(collection[j], collection[j - 1]);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ int main()
 
     //----------------------------------------------------------------------------------------------
 
-    rav::insertion_sorting_template(vector, [](int a, int b) -> bool { return a < b; });
+    rav::insertion_sorting_template(vector, [](int a, int b) -> bool { return a > b; });
     rav::print_collection(vector, "Sorted vector: ");
 
     return EXIT_SUCCESS;
