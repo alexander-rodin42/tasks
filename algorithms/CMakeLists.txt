@@ -15,4 +15,6 @@ add_executable(InsertionSorting ./sorting/InsertionSorting.cpp)
 add_executable(MergeSorting ./sorting/MergeSorting.cpp)
 add_executable(SelectionSorting ./sorting/SelectionSorting.cpp)
 add_executable(ShellSorting ./sorting/ShellSorting.cpp)
-set_target_properties (BubbleSorting QuickSorting CountingSorting InsertionSorting MergeSorting SelectionSorting ShellSorting PROPERTIES FOLDER "Sorting")
+add_executable(StupidSorting ./sorting/StupidSorting.cpp)
+set_target_properties (BubbleSorting QuickSorting CountingSorting InsertionSorting MergeSorting
+						SelectionSorting ShellSorting StupidSorting PROPERTIES FOLDER "Sorting")
