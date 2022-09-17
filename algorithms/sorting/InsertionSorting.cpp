@@ -22,8 +22,8 @@ namespace rav {
     template <typename Collection, typename Comparator>
     void insertion_sorting_template(Collection& collection, Comparator comparator) noexcept
     {
-        for (auto i = 1; i < collection.size(); i++)
-            for (auto j = i; (j > 0) && (comparator(collection[j], collection[j - 1])); j--)
+        for (typename Collection::size_type i = 1; i < collection.size(); i++)
+            for (typename Collection::size_type j = i; (j > 0) && (comparator(collection[j], collection[j - 1])); j--)
                 std::swap(collection[j], collection[j - 1]);
     }
 
