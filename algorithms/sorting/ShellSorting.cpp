@@ -27,10 +27,16 @@ namespace rav {
     void shell_sorting_template(Collection& collection, Comparator comparator) noexcept
     {
         for (typename Collection::size_type step = collection.size() / 2; step > 0; step /= 2)
+        {
             for (typename Collection::size_type i = step; i < collection.size(); i++)
+            {
                 for (typename Collection::size_type j = i; (j > step - 1) && comparator(collection[j], collection[j - step]);
                      j--)
+                {
                     std::swap(collection[j], collection[j - step]);
+                }
+            }
+        }
     }
 
     //----------------------------------------------------------------------------------------------
