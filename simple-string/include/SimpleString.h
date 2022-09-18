@@ -1,6 +1,10 @@
 #pragma once
 
-// A naive implementation of the string type without the use of third-party libraries and STL.
+/*
+    Comment to the task:
+    A naive implementation of the string type without the use of third-party libraries and STL.
+    Using the STL, you can add an STL-compatible iterator, as well as correctly handle std::bad_alloc exceptions.
+*/
 
 namespace rav {
 
@@ -17,6 +21,8 @@ namespace rav {
         class Iterator;
 
         SimpleString();
+
+        // Not declared as "explicit" because an implicit conversion is needed for the outer operator+().
         SimpleString(const char* data);
 
         SimpleString(const SimpleString& other);
