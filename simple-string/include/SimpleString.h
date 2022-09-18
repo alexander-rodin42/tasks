@@ -1,21 +1,28 @@
 #pragma once
 
+// A naive implementation of the string type without the use of third-party libraries and STL.
+
 namespace rav {
 
     enum
     {
-        kExtraBuffer = 5
+        kExtraBuffer = 5,
+        kShortStringSize = 15
     };
 
+    // A string up to and including 15 characters is stored on the stack, strings over 15 characters are stored on the heap.
     class SimpleString
     {
     public:
-        SimpleString() = default;
+        class Iterator;
+
+        SimpleString();
         SimpleString(const char* data);
 
         SimpleString(const SimpleString& other);
         SimpleString& operator=(const SimpleString& other);
 
+        // A string of up to 15 characters inclusive is copied, more is moved.
         SimpleString(SimpleString&& other) noexcept;
         SimpleString& operator=(SimpleString&& other) noexcept;
 
@@ -34,26 +41,31 @@ namespace rav {
         size_t size() const noexcept;
         size_t capacity() const noexcept;
         bool empty() const noexcept;
-
-        // Returns "nullptr" for objects:
-        // 1) created by the default constructor
-        // 2) after moving (std::move())
         const char* data() const noexcept;
 
         void reserve(size_t newCapacity);
-        const SimpleString concatenate(const SimpleString& other) const;
+
+        // Returns a non-const object for std::move() to work.
+        SimpleString concatenate(const SimpleString& other) const;
 
     private:
-        char* m_data = nullptr;
-        size_t m_size = 0;
-        size_t m_capacity = 0;
+        size_t m_size = 0u;
+        size_t m_capacity = kShortStringSize;
 
-        void copyData(const char* inputData, const size_t size, const size_t bedinIndex = 0);
+        // Short string (size <= 15), located on the stack. (SSO)
+        char m_shortData[kShortStringSize + 1];
+
+        // Long string (size > 15), placed on the heap.
+        char* m_longData = nullptr;
+
         void bringToDefault();
+        bool isShortString() const;
+        static void copyData(const char* inputData, char* target, const size_t size, const size_t bedinIndex = 0u);
         static size_t stringLength(const char* begin);
     };
 
-    // You can combine it with the concatenate() function and make it a friend of the SimpleString class.
-    const SimpleString operator+(const SimpleString& first, const SimpleString& second);
+    // It could have been implemented as concatenate() and made a friend of the SimpleString class.
+    // Returns a non-constant object, like a std::string from the STL.
+    SimpleString operator+(const SimpleString& first, const SimpleString& second);
 
 }  // namespace rav

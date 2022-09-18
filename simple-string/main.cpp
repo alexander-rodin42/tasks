@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 #include <algorithm>
 #include <vector>
 
@@ -23,10 +24,10 @@ std::ostream& operator<<(std::ostream& os, const SimpleString& string)
     return os << string.data();
 }
 
-
 void input(std::vector<SimpleString>& vector)
 {
-    std::cout << "To finish entering words, enter \"stop\"" << std::endl;
+    std::cout << "---------------------------------------------------" << std::endl;
+    std::cout << "Fill array. To finish entering words, enter \"stop\"." << std::endl;
 
     SimpleString input;
     while (input != "stop")
@@ -39,17 +40,7 @@ void input(std::vector<SimpleString>& vector)
             vector.push_back(input);
         }
     }
-}
-
-void convertToLowercase(SimpleString& value)
-{
-    for (size_t i = 0; i < value.size(); ++i)
-    {
-        if (value[i] >= 'A' && value[i] <= 'Z')
-        {
-            value[i] += 32;
-        }
-    }
+    std::cout << "---------------------------------------------------" << std::endl;
 }
 
 void printInfo(const std::vector<SimpleString>& vector)
@@ -60,28 +51,31 @@ void printInfo(const std::vector<SimpleString>& vector)
     }
 }
 
-auto compareSymbols = [](SimpleString first, SimpleString second) {
-    convertToLowercase(first);
-    convertToLowercase(second);
+auto compareSymbols = [](SimpleString first, SimpleString second) -> bool {
+    std::transform(first.begin(), first.end(), first.begin(), ::tolower);
+    std::transform(second.begin(), second.end(), second.begin(), ::tolower);
     return first > second;
 };
 
 int main(int argc, char* argv[])
 {
-    std::vector<SimpleString> data = {"abc", "BCD", "ABC", "123", "bcd", "aBC"};
+    // Example:
+    std::vector<SimpleString> data{"abc", "BCD", "ABC", "123", "bcd", "aBC"};
+    std::cout << "Sorting example:" << std::endl;
     std::cout << "Not sorted vector:" << std::endl;
     printInfo(data);
     std::sort(data.begin(), data.end(), compareSymbols);
     std::cout << "Sorted vector:" << std::endl;
     printInfo(data);
 
-    //-------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------
     std::vector<SimpleString> inData;
     input(inData);
     std::sort(inData.begin(), inData.end(), compareSymbols);
     printInfo(inData);
 
-    //-------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------
+    std::cout << "---------------------------------------------------" << std::endl;
     SimpleString command;
     while (command != "exit")
     {

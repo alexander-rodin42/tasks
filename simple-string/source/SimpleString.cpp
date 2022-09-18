@@ -2,38 +2,59 @@
 
 using namespace rav;
 
-SimpleString::SimpleString(const char* data) : m_size(stringLength(data)), m_capacity(m_size + kExtraBuffer)
+SimpleString::SimpleString()
 {
-    try
+    m_shortData[0] = '\0';
+}
+
+SimpleString::SimpleString(const char* data) : m_size(stringLength(data))
+{
+    if (data == nullptr)
     {
-        if (data)
-        {
-            m_data = new char[m_capacity + 1];
-        }
-    }
-    catch (...)  // (const std::bad_alloc& e) "1. Written in C++11 without any third party libraries."
-    {
-        throw;  // std::runtime_error("Memory was not allocated for allocator.");
+        m_shortData[0] = '\0';
     }
 
-    copyData(data, m_size);
+    if (m_size <= kShortStringSize)
+    {
+        copyData(data, m_shortData, m_size);
+    }
+    else
+    {
+        m_capacity = m_size + kExtraBuffer;
+        try
+        {
+            m_longData = new char[m_capacity + 1];
+        }
+        catch (...)  // (const std::bad_alloc& e) "1. Written in C++11 without any third party libraries."
+        {
+            throw;  // std::runtime_error("Memory was not allocated for allocator.");
+        }
+
+        copyData(data, m_longData, m_size);
+        m_shortData[0] = '\0';
+    }
 }
 
 SimpleString::SimpleString(const SimpleString& other) : m_size(other.m_size), m_capacity(other.m_capacity)
 {
-    try
+    if (other.isShortString())
     {
-        if (other.m_data)
+        copyData(other.m_shortData, m_shortData, m_size);
+    }
+    else
+    {
+        try
         {
-            m_data = new char[m_capacity + 1];
+            m_longData = new char[m_capacity + 1];
         }
-    }
-    catch (...)
-    {
-        throw;
-    }
+        catch (...)
+        {
+            throw;
+        }
 
-    copyData(other.m_data, other.m_size);
+        copyData(other.m_longData, m_longData, m_size);
+        m_shortData[0] = '\0';
+    }
 }
 
 SimpleString& SimpleString::operator=(const SimpleString& other)
@@ -43,38 +64,51 @@ SimpleString& SimpleString::operator=(const SimpleString& other)
         return *this;
     }
 
-    if (m_capacity < other.m_size)
+    if (other.isShortString())
     {
-        char* tempData = m_data;
-
-        try
-        {
-            if (other.m_data)
-            {
-                m_data = new char[other.m_capacity + 1];
-            }
-        }
-        catch (...)
-        {
-            m_data = tempData;
-            throw;
-        }
-
-        m_capacity = other.m_capacity;
-        delete[] tempData;
+        m_size = other.m_size;
+        copyData(other.m_shortData, m_shortData, m_size);
     }
+    else
+    {
+        if (m_capacity < other.m_size)
+        {
+            char* tempData = m_longData;
 
-    m_size = other.m_size;
-    copyData(other.m_data, other.m_size);
+            try
+            {
+                m_longData = new char[other.m_capacity + 1];
+            }
+            catch (...)
+            {
+                m_longData = tempData;
+                throw;
+            }
 
-    return *this;
+            m_capacity = other.m_capacity;
+            delete[] tempData;
+        }
+
+        m_size = other.m_size;
+        copyData(other.m_longData, m_longData, other.m_size);
+        m_shortData[0] = '\0';
+    }
 }
 
-SimpleString::SimpleString(SimpleString&& other) noexcept
+rav::SimpleString::SimpleString(SimpleString&& other) noexcept
 {
-    m_size = other.m_size;
-    m_capacity = other.m_capacity;
-    m_data = other.m_data;
+    if (other.isShortString())
+    {
+        m_size = other.m_size;
+        copyData(other.m_shortData, m_shortData, m_size);
+    }
+    else
+    {
+        m_size = other.m_size;
+        m_capacity = other.m_capacity;
+        m_longData = other.m_longData;
+        m_shortData[0] = '\0';
+    }
 
     other.bringToDefault();
 }
@@ -83,9 +117,24 @@ SimpleString& SimpleString::operator=(SimpleString&& other) noexcept
 {
     if (this != &other)
     {
+        if (!m_longData)
+        {
+            delete[] m_longData;
+            m_longData = nullptr;
+        }
+
         m_size = other.m_size;
         m_capacity = other.m_capacity;
-        m_data = other.m_data;
+
+        if (other.isShortString())
+        {
+            copyData(other.m_shortData, m_shortData, other.m_size);
+        }
+        else
+        {
+            m_longData = other.m_longData;
+            m_shortData[0] = '\0';
+        }
 
         other.bringToDefault();
     }
@@ -95,17 +144,27 @@ SimpleString& SimpleString::operator=(SimpleString&& other) noexcept
 
 SimpleString::~SimpleString()
 {
-    delete[] m_data;
+    if (!(isShortString()))
+    {
+        delete[] m_longData;
+    }
 }
 
 char& SimpleString::operator[](const size_t index)
 {
-    return m_data[index];
+    if (isShortString())
+    {
+        return m_shortData[index];
+    }
+    else
+    {
+        return m_longData[index];
+    }
 }
 
 const char& SimpleString::operator[](const size_t index) const
 {
-    return m_data[index];
+    return this->operator[](index);
 }
 
 bool SimpleString::operator<(const SimpleString& other) noexcept
@@ -117,17 +176,18 @@ bool SimpleString::operator<(const SimpleString& other) noexcept
 
     if (m_size != 0 && other.m_size != 0)
     {
+        const auto* first = data();
+        const auto* second = other.data();
+
         for (size_t i = 0; i < m_size && i < other.m_size; ++i)
         {
-            if (m_data[i] != other.m_data[i])
+            if (first[i] != second[i])
             {
-                return m_data[i] < other.m_data[i] ? true : false;
+                return first[i] < second[i] ? true : false;
             }
         }
         return m_size < other.m_size ? true : false;
     }
-
-    return false;
 }
 
 bool SimpleString::operator>(const SimpleString& other) noexcept
@@ -137,16 +197,9 @@ bool SimpleString::operator>(const SimpleString& other) noexcept
 
 bool SimpleString::operator==(const SimpleString& other) noexcept
 {
-    if (m_size != 0 && other.m_size != 0)
+    if (m_size != other.m_size)
     {
-        for (size_t i = 0; i < m_size && i < other.m_size; ++i)
-        {
-            if (m_data[i] != other.m_data[i])
-            {
-                return false;
-            }
-        }
-        return m_size == other.m_size ? true : false;
+        return false;
     }
 
     if (m_size == 0 && other.m_size == 0)
@@ -154,7 +207,17 @@ bool SimpleString::operator==(const SimpleString& other) noexcept
         return true;
     }
 
-    return false;
+    const auto* first = data();
+    const auto* second = other.data();
+
+    for (size_t i = 0; i < m_size && i < other.m_size; ++i)
+    {
+        if (first[i] != second[i])
+        {
+            return false;
+        }
+    }
+    return m_size == other.m_size ? true : false;
 }
 
 bool SimpleString::operator!=(const SimpleString& other) noexcept
@@ -164,12 +227,26 @@ bool SimpleString::operator!=(const SimpleString& other) noexcept
 
 char* SimpleString::begin() noexcept
 {
-    return m_data;
+    if (isShortString())
+    {
+        return m_shortData;
+    }
+    else
+    {
+        return m_longData;
+    }
 }
 
 char* SimpleString::end() noexcept
 {
-    return m_data + m_size;
+    if (isShortString())
+    {
+        return m_shortData + m_size;
+    }
+    else
+    {
+        return m_longData + m_size;
+    }
 }
 
 size_t SimpleString::size() const noexcept
@@ -189,78 +266,88 @@ bool SimpleString::empty() const noexcept
 
 const char* SimpleString::data() const noexcept
 {
-    return m_data;
+    if (isShortString())
+    {
+        return m_shortData;
+    }
+    else
+    {
+        return m_longData;
+    }
 }
 
 void SimpleString::reserve(size_t newCapacity)
 {
-    char* tempData = m_data;
-
-    try
+    if (m_capacity < newCapacity)
     {
-        m_data = new char[newCapacity + 1];
-    }
-    catch (...)
-    {
-        m_data = tempData;
-        throw;
-    }
+        char* tempData = m_longData;
 
-    m_capacity = newCapacity;
-
-    if (tempData != nullptr)
-    {
-        if (m_size <= m_capacity)
+        try
         {
-            copyData(tempData, m_size);
+            m_longData = new char[newCapacity + kExtraBuffer + 1];
+        }
+        catch (...)
+        {
+            m_longData = tempData;
+            throw;
+        }
+
+        if (isShortString())
+        {
+            copyData(m_shortData, m_longData, m_size);
+            m_shortData[0] = '\0';
         }
         else
         {
-            copyData(tempData, m_capacity - 1);
-            m_data[m_capacity] = '\0';
-            m_size = m_capacity;
+            copyData(tempData, m_longData, m_size);
+            delete[] tempData;
         }
 
-        delete[] tempData;
-    }
-    else
-    {
-        m_data[0] = '\0';
+        m_capacity = newCapacity + kExtraBuffer;
     }
 }
 
-const SimpleString SimpleString::concatenate(const SimpleString& other) const
+SimpleString SimpleString::concatenate(const SimpleString& other) const
 {
     if (m_size == 0 && other.m_size == 0)
     {
         return SimpleString();
     }
 
+    const auto* first = data();
+    const auto* second = other.data();
+
     SimpleString result;
-    result.reserve(m_size + other.m_size + kExtraBuffer);
-    result.copyData(m_data, m_size);
-    result.copyData(other.m_data, other.m_size, m_size);
+    result.reserve(m_size + other.m_size);
+    result.copyData(first, result.begin(), m_size);
+    result.copyData(second, result.begin(), other.m_size, m_size);
     result.m_size = m_size + other.m_size;
 
     return result;
 }
 
-void SimpleString::copyData(const char* inputData, const size_t size, const size_t bedinIndex)
+void SimpleString::bringToDefault()
+{
+    m_size = 0;
+    m_capacity = kShortStringSize;
+    m_shortData[0] = '\0';
+    m_longData = nullptr;
+}
+
+bool SimpleString::isShortString() const
+{
+    return m_capacity > kShortStringSize ? false : true;
+}
+
+void SimpleString::copyData(const char* inputData, char* target, const size_t size, const size_t bedinIndex)
 {
     if (inputData != nullptr)
     {
         for (size_t i = 0; i <= size; ++i)
         {
-            m_data[bedinIndex + i] = inputData[i];
+            target[bedinIndex + i] = inputData[i];
         }
     }
-}
-
-void SimpleString::bringToDefault()
-{
-    m_data = nullptr;
-    m_size = 0;
-    m_capacity = 0;
 }
 
 size_t SimpleString::stringLength(const char* begin)
@@ -274,7 +361,7 @@ size_t SimpleString::stringLength(const char* begin)
     return end - begin;
 }
 
-const SimpleString rav::operator+(const SimpleString& first, const SimpleString& second)
+SimpleString rav::operator+(const SimpleString& first, const SimpleString& second)
 {
     return first.concatenate(second);
 }
