@@ -42,7 +42,7 @@ namespace rav {
         bool operator==(const SimpleString& other) noexcept;
         bool operator!=(const SimpleString& other) noexcept;
 
-        SimpleString& operator+=(const SimpleString& other) noexcept;
+        SimpleString& operator+=(const SimpleString& other);
 
         char* begin() noexcept;
         char* end() noexcept;

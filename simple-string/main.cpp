@@ -2,6 +2,7 @@
 #include <functional>
 #include <algorithm>
 #include <vector>
+#include <exception>
 
 #include "SimpleString.h"
 
@@ -13,7 +14,14 @@ std::istream& operator>>(std::istream& is, SimpleString& simpleString)
     is >> inData;
     if (is)
     {
-        simpleString = inData.c_str();
+        try
+        {
+            simpleString = inData.c_str();
+        }
+        catch (const std::exception& e)
+        {
+            throw e;
+        }
     }
 
     return is;
@@ -33,11 +41,18 @@ void input(std::vector<SimpleString>& vector)
     while (input != "stop")
     {
         std::cout << "Enter a word: ";
-        std::cin >> input;
 
-        if (input != "stop")
+        try
         {
-            vector.push_back(input);
+            std::cin >> input;
+            if (input != "stop")
+            {
+                vector.push_back(input);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            throw e;
         }
     }
     std::cout << "---------------------------------------------------" << std::endl;
@@ -70,8 +85,17 @@ int main(int argc, char* argv[])
 
     //------------------------------------------------------------------------------
     std::vector<SimpleString> inData;
-    input(inData);
-    std::sort(inData.begin(), inData.end(), compareSymbols);
+    try
+    {
+        input(inData);
+        std::sort(inData.begin(), inData.end(), compareSymbols);
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what();
+        throw std::runtime_error("Memory was not allocated for allocator.");
+    }
+
     printInfo(inData);
 
     //------------------------------------------------------------------------------

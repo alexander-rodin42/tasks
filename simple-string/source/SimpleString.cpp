@@ -225,11 +225,19 @@ bool SimpleString::operator!=(const SimpleString& other) noexcept
     return !(*this == other);
 }
 
-SimpleString& SimpleString::operator+=(const SimpleString& other) noexcept
+SimpleString& SimpleString::operator+=(const SimpleString& other)
 {
     const auto* second = other.data();
 
-    this->reserve(m_size + other.m_size);
+    try
+    {
+        this->reserve(m_size + other.m_size);
+    }
+    catch (...)
+    {
+        throw;
+    }
+
     copyData(second, begin(), other.m_size, m_size);
     m_size = m_size + other.m_size;
 
