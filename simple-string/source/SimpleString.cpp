@@ -225,6 +225,17 @@ bool SimpleString::operator!=(const SimpleString& other) noexcept
     return !(*this == other);
 }
 
+SimpleString& SimpleString::operator+=(const SimpleString& other) noexcept
+{
+    const auto* second = other.data();
+
+    this->reserve(m_size + other.m_size);
+    copyData(second, begin(), other.m_size, m_size);
+    m_size = m_size + other.m_size;
+
+    return *this;
+}
+
 char* SimpleString::begin() noexcept
 {
     if (isShortString())
@@ -307,25 +318,6 @@ void SimpleString::reserve(size_t newCapacity)
     }
 }
 
-SimpleString SimpleString::concatenate(const SimpleString& other) const
-{
-    if (m_size == 0 && other.m_size == 0)
-    {
-        return SimpleString();
-    }
-
-    const auto* first = data();
-    const auto* second = other.data();
-
-    SimpleString result;
-    result.reserve(m_size + other.m_size);
-    result.copyData(first, result.begin(), m_size);
-    result.copyData(second, result.begin(), other.m_size, m_size);
-    result.m_size = m_size + other.m_size;
-
-    return result;
-}
-
 void SimpleString::bringToDefault()
 {
     m_size = 0;
@@ -363,5 +355,5 @@ size_t SimpleString::stringLength(const char* begin)
 
 SimpleString rav::operator+(const SimpleString& first, const SimpleString& second)
 {
-    return first.concatenate(second);
+    return SimpleString(first) += second;
 }

@@ -42,6 +42,8 @@ namespace rav {
         bool operator==(const SimpleString& other) noexcept;
         bool operator!=(const SimpleString& other) noexcept;
 
+        SimpleString& operator+=(const SimpleString& other) noexcept;
+
         char* begin() noexcept;
         char* end() noexcept;
         size_t size() const noexcept;
@@ -50,9 +52,6 @@ namespace rav {
         const char* data() const noexcept;
 
         void reserve(size_t newCapacity);
-
-        // Returns a non-const object for std::move() to work.
-        SimpleString concatenate(const SimpleString& other) const;
 
     private:
         size_t m_size = 0u;
