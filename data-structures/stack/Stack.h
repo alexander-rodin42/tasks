@@ -157,7 +157,14 @@ namespace rav {
     {
         if (m_size == m_capacity)
         {
-            reserve(m_capacity * 2 + 1);
+            try
+            {
+                reserve(m_capacity * 2 + 1);
+            }
+            catch (const std::runtime_error& e)
+            {
+                throw e;
+            }
         }
 
         new (m_data + m_size) T(value);
