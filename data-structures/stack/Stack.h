@@ -106,6 +106,12 @@ namespace rav {
     template <typename T>
     Stack<T>& Stack<T>::operator=(Stack<T>&& other) noexcept
     {
+        if (m_size > 0)
+        {
+            std::destroy(m_data, m_data + m_size);
+            operator delete(m_data);
+        }
+
         if (this != &other)
         {
             m_data = other.m_data;

@@ -44,6 +44,16 @@ int main(int argc, char* argv[])
             stack3.pop();
 
             std::cout << "-------------------------------------------" << std::endl;
+            std::cout << "Create: stack4:" << std::endl;
+            rav::Stack<Test> stack4(2);
+            stack4.push(Test(5));
+            stack4.push(Test(6));
+
+            std::cout << "-------------------------------------------" << std::endl;
+            std::cout << "Move: stack3 -> stack4:" << std::endl;
+            stack4 = std::move(stack3);
+
+            std::cout << "-------------------------------------------" << std::endl;
             std::cout << "Start destroying" << std::endl;
         }
         std::cout << "Complete destroy" << std::endl;
