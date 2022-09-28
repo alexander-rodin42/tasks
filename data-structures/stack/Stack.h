@@ -71,24 +71,33 @@ namespace rav {
     {
         if (this != &other)
         {
-            m_size = other.m_size;
-            m_capacity = other.m_capacity;
-
             if (other.m_data)
             {
+                T* tempData = m_data;
+
                 try
                 {
-                    m_data = static_cast<T*>(operator new(sizeof(T) * m_capacity));
+                    m_data = static_cast<T*>(operator new(sizeof(T) * other.m_capacity));
                 }
                 catch (const std::bad_alloc& e)
                 {
+                    m_data = tempData;
                     throw std::runtime_error("Memory was not allocated.");
                 }
 
-                for (size_t i = 0; i < m_size; ++i)
+                for (size_t i = 0; i < other.m_size; ++i)
                 {
                     new (m_data + i) T(other.m_data[i]);
                 }
+
+                if (m_size > 0)
+                {
+                    std::destroy(tempData, tempData + m_size);
+                }
+                operator delete(tempData);
+
+                m_size = other.m_size;
+                m_capacity = other.m_capacity;
             }
         }
 

@@ -35,8 +35,13 @@ int main(int argc, char* argv[])
             rav::Stack<Test> stack2(std::move(stack1));
 
             std::cout << "-------------------------------------------" << std::endl;
+            std::cout << "Create: stack3:" << std::endl;
+            rav::Stack<Test> stack3(2);
+            stack3.push(Test(5));
+            stack3.push(Test(6));
+
+            std::cout << "-------------------------------------------" << std::endl;
             std::cout << "Copy: stack3 = stack2:" << std::endl;
-            rav::Stack<Test> stack3;
             stack3 = stack2;
 
             std::cout << "-------------------------------------------" << std::endl;
