@@ -10,6 +10,7 @@ int main(int argc, char* argv[])
         // rav::Stack<int> stack(100000000000);
 
         {
+            std::cout << "Stack<int>" << std::endl;
             rav::Stack<int> stack(10);
             stack.push(1);
             stack.push(5);
@@ -18,6 +19,16 @@ int main(int argc, char* argv[])
             std::cout << "stack.top(): " << stack.top() << " size: " << stack.size() << std::endl;
             stack.pop();
             std::cout << "stack.top(): " << stack.top() << " size: " << stack.size() << std::endl;
+            std::cout << "-------------------------------------------" << std::endl;
+
+            std::cout << "Stack<std::string>" << std::endl;
+            rav::Stack<std::string> stack2(10);
+            stack2.push("string - 1234567890");
+            stack2.push("string - 0987654321");
+            stack2.push("string - qazwsxedcr");
+            std::cout << "stack2.top(): " << stack2.top() << " size: " << stack2.size() << std::endl;
+            stack2.pop();
+            std::cout << "stack2.top(): " << stack2.top() << " size: " << stack2.size() << std::endl;
             std::cout << "-------------------------------------------" << std::endl;
         }
 
