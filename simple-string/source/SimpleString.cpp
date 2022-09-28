@@ -93,6 +93,8 @@ SimpleString& SimpleString::operator=(const SimpleString& other)
         copyData(other.m_longData, m_longData, other.m_size);
         m_shortData[0] = '\0';
     }
+
+    return *this;
 }
 
 rav::SimpleString::SimpleString(SimpleString&& other) noexcept
